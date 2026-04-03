@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  cs
+  op_lt1
+  op_lt2
+  op_lt3
+  spv
+}
+
+enum ReportType {
+  OPENING
+  CLOSING
+}
+
+model Profile {
+  id         String   @id @db.Uuid
+  full_name  String
+  role       Role     @default(cs)
+  reports    Report[]
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("profiles") 
+}
+
+model Report {
+  id              String         @id @default(uuid()) @db.Uuid
+  user_id         String         @db.Uuid
+  profile         Profile        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  studio_location String
+  report_type     ReportType
+  checklist_data  Json           
+  notes           String?
+  
+  is_cleaned      Boolean        @default(false)
+  photos          ReportPhoto[]
+  
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  @@map("reports")
+}
+
+model ReportPhoto {
+  id         String   @id @default(uuid()) @db.Uuid
+  report_id  String   @db.Uuid
+  report     Report   @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  
+  photo_url  String
+  created_at DateTime @default(now())
+
+  @@map("report_photos")
+}

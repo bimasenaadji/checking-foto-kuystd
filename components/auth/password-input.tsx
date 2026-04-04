@@ -1,26 +1,49 @@
-// src/components/auth/auth-layout.tsx
-import { Camera } from "lucide-react";
+// src/components/auth/password-input.tsx
+"use client";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export function AuthLayout({ children }: { children: React.ReactNode }) {
+interface PasswordInputProps {
+  value: string;
+  onChange: (val: string) => void;
+  label?: string;
+  placeholder?: string;
+  id?: string;
+  name: string;
+}
+
+export function PasswordInput({
+  value,
+  onChange,
+  label = "Password",
+  placeholder = "••••••••",
+  id = "password",
+  name = "password",
+}: PasswordInputProps) {
+  const [show, setShow] = useState(false);
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/25">
-            <Camera className="w-7 h-7 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            Kuy Studio
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Sistem Laporan Harian
-          </p>
-        </div>
-        {children}
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          Kuy Studio &copy; {new Date().getFullYear()} &mdash; Hak cipta
-          dilindungi
-        </p>
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <Input
+          id={id}
+          type={show ? "text" : "password"}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="pr-10"
+          required
+          name={name}
+        />
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        >
+          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
       </div>
     </div>
   );

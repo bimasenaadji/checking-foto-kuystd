@@ -13,11 +13,9 @@ datasource db {
 }
 
 enum Role {
-  cs
-  op_lt1
-  op_lt2
-  op_lt3
-  spv
+ CREW
+ ADMIN
+ SUPERVISOR
 }
 
 enum ReportType {
@@ -28,7 +26,7 @@ enum ReportType {
 model Profile {
   id         String   @id @db.Uuid
   full_name  String
-  role       Role     @default(cs)
+  role      Role @default(CREW)
   reports    Report[]
   
   created_at DateTime @default(now())

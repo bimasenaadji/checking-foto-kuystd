@@ -15,17 +15,25 @@ import {
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { PasswordInput } from "@/components/auth/password-input";
 import Link from "next/link";
+import { signInAction } from "@/actions/auth";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    // Nanti di sini panggil supabase.auth.signInWithPassword
-    console.log("Login dengan:", email);
+
+    const formData = new FormData(e.currentTarget);
+
+    const result = await signInAction(formData);
+    if (result?.error) {
+      setError(result.error);
+      setLoading(false);
+    }
+
     setLoading(false);
   };
 
@@ -44,12 +52,23 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="nama@kuystudio.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
                 required
               />
             </div>
-            <PasswordInput value={password} onChange={setPassword} />
+            <PasswordInput
+              name="password"
+              value={password}
+              onChange={setPassword}
+            />
+
+            {/* Menampilkan Error jika ada */}
+            {error && (
+              <div className="bg-destructive/15 border border-destructive/30 p-3 rounded-md text-destructive text-sm font-medium">
+                {error}
+              </div>
+            )}
+
             <Button className="w-full" disabled={loading}>
               {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

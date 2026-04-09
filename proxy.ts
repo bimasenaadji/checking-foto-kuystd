@@ -12,23 +12,33 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  const isAuthPage =
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/register");
+  const isAuthPage = path.startsWith("/login") || path.startsWith("/register");
 
+  // --- 1. LOGIKA UNTUK USER YANG BELUM LOGIN ---
   if (!user) {
     if (!isAuthPage) {
+      // Kalau mau buka halaman dalem tapi belum login, lempar ke login
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       return NextResponse.redirect(url, { headers: response.headers });
     }
+    // PENYELAMAT: Kalau dia di halaman login/register, biarkan masuk dan STOP di sini!
+    return response;
   }
 
-  const { data: profile } = await supabase
+  // --- 2. LOGIKA UNTUK USER YANG SUDAH LOGIN ---
+  // Ubah bagian ini untuk menangkap error:
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user?.id)
+    .eq("id", user.id)
     .single();
+
+  // TARUH CONSOLE LOG INI:
+  console.log("CEK PROFIL BIMA ->", profile);
+  if (profileError) {
+    console.log("ERROR SUPABASE ->", profileError.message);
+  }
 
   const role = profile?.role;
 

@@ -44,7 +44,8 @@ export async function signInAction(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const { error } = await supabase.auth.signInWithPassword({
+  // 1. Ekstrak 'data' untuk mendapatkan user ID nanti
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -53,5 +54,32 @@ export async function signInAction(formData: FormData) {
     return { error: error.message };
   }
 
-  redirect("/landing");
+  // 2. Jika login sukses, ambil role dari tabel profiles
+  if (data.user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .single();
+
+    const role = profile?.role;
+
+    // 3. Lempar (redirect) sesuai Role
+    if (role === "SUPERVISOR") {
+      redirect("/admin");
+    } else {
+      redirect("/dashboard"); // Default untuk CREW
+    }
+  }
+
+  // Fallback jika terjadi sesuatu yang aneh
+  redirect("/login");
+}
+
+export async function signOutAction() {
+  const supabase = await createClient();
+
+  await supabase.auth.signOut();
+
+  redirect("/login");
 }
